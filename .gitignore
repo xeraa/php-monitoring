@@ -1,0 +1,13 @@
+.gradle/
+.idea/
+.terraform/
+build/
+out/
+
+*.backup
+*.log
+*.retry
+*.tfstate
+*.tfstate.lock.info
+id_rsa
+id_rsa.pub

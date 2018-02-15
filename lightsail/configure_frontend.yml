@@ -1,0 +1,104 @@
+- hosts: frontend
+  remote_user: ubuntu
+  become: true
+  gather_facts: yes
+
+
+  vars_files:
+    - variables.yml
+
+
+  post_tasks:
+    - include_tasks: ansible_event.yml
+      vars:
+        application: configure_frontend
+
+
+  tasks:
+
+    # PHP
+    - name: Install PHP
+      apt: name={{ item }}
+      with_items:
+        - php-cli
+        - php-curl
+        - php-fpm
+        - php-gd
+        - php-intl
+        - php-mbstring
+        - php-mysql
+        - php-tidy
+        - php-xml
+
+    - name: Configure PHP
+      lineinfile:
+        dest: /etc/php/7.0/fpm/php.ini
+        line: "{{ item.key }} = {{ item.value }}"
+        regexp: "^\\s*(;\\s*)?{{ item.key }}"
+      with_items:
+        - { key: 'display_errors', value: 'On' }
+        - { key: 'date.timezone', value: 'Europe/Vienna' }
+
+    - name: Restart PHP and make sure it autostarts
+      service: name=php7.0-fpm state=restarted enabled=yes
+
+    - name: Check if Composer is installed
+      stat: path=/usr/local/bin/composer
+      register: composer_bin
+
+    - name: Download Composer installer
+      get_url:
+        url: https://getcomposer.org/installer
+        dest: /tmp/composer-installer.php
+        mode: 0755
+      when: not composer_bin.stat.exists
+
+    - name: Run Composer installer
+      command: >
+        php composer-installer.php --install-dir=/usr/local/bin --filename=composer
+        chdir=/tmp
+      when: not composer_bin.stat.exists
+
+    # Configure nginx
+    - name: Change the nginx configuration
+      template: src=templates/nginx_frontend.conf dest=/etc/nginx/sites-available/default
+
+    - name: Restart nginx and make sure it autostarts
+      service: name=nginx state=restarted enabled=yes
+
+    - name: Check HTTP
+      uri:
+        url: "http://{{ inventory_hostname }}"
+        follow_redirects: none
+        status_code: 301
+      register: response
+      retries: 3
+      delay: 2
+      delegate_to: 127.0.0.1
+      become: false
+
+    - name: Fail if HTTP is not being redirected to HTTPS
+      fail:
+      when: response.status != 301
+
+    - name: Check HTTPS
+      openssl_certificate:
+        path: /etc/letsencrypt/live/{{ inventory_hostname }}/fullchain.pem
+        provider: assertonly
+        issuer:
+          O: Let's Encrypt
+        has_expired: false
+        subject_alt_name:
+          - "DNS:{{ inventory_hostname }}"
+
+    - name: Check HTTPS apex
+      openssl_certificate:
+        path: /etc/letsencrypt/live/{{ inventory_hostname }}/fullchain.pem
+        provider: assertonly
+        issuer:
+          O: Let's Encrypt
+        has_expired: false
+        subject_alt_name:
+          - "DNS:{{ domain }}"
+      when: inventory_hostname == "frontend." + domain
+

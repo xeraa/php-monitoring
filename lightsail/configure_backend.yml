@@ -1,0 +1,133 @@
+- hosts: backend
+  remote_user: ubuntu
+  become: true
+  gather_facts: yes
+
+
+  vars_files:
+    - variables.yml
+
+
+  vars:
+      kibana_basic_auth: "{{ attendee_user }}:{{ attendee_password  }}"
+
+
+  post_tasks:
+    - include_tasks: ansible_event.yml
+      vars:
+        application: configure_backend
+
+
+  tasks:
+
+    # Add the JRE so we can run the bad.jar
+    - name: Install the JRE
+      apt: name=openjdk-8-jre-headless install_recommends=no
+
+    # MySQL
+    - name: Install the DEB packages required for Ansible's MySQL modules
+      apt: name={{ item }}
+      with_items:
+        - python3-dev
+        - libmysqlclient-dev
+
+    - name: Install the Python package required for Ansible's MySQL modules
+      pip: name=mysqlclient
+
+    - name: Install MySQL
+      apt: name=mysql-server
+
+    - name: Removes all anonymous user accounts
+      mysql_user:
+        name: ""
+        host_all: yes
+        state: absent
+
+    - name: Create database user and password for SilverStripe with all database privileges
+      mysql_user:
+        name: "{{ silverstripe_mysql_user }}"
+        password: "{{ silverstripe_mysql_password }}"
+        priv: "*.*:ALL"
+        host: "%"
+        state: present
+
+    - name: Create a new database for SilverStripe
+      mysql_db:
+        name: "{{ silverstripe_database }}"
+        state: present
+
+    - name: Bind MySQL to all interfaces
+      ini_file: dest=/etc/mysql/mysql.conf.d/mysqld.cnf
+            section=mysqld
+            option=bind-address
+            value="0.0.0.0"
+
+    - name: Restart MySQL and make sure it autostarts
+      service: name=mysql state=restarted enabled=yes
+
+    # Heartbeat
+    - name: Install Heartbeat
+      apt: deb={{ elastic_download }}/downloads/beats/heartbeat/heartbeat-{{ elastic_version }}-amd64.deb
+
+    - name: Change the Heartbeat configuration
+      template: src=templates/heartbeat.yml dest=/etc/heartbeat/heartbeat.yml
+
+    - name: Restart Heartbeat and make sure it autostarts
+      service: name=heartbeat-elastic state=restarted enabled=yes
+
+    # Dashboard-only user
+    - name: Create a role for a user to only view the dashboards
+      uri:
+        url: "{{elasticsearch_host}}.security-6/doc/role-read_dashboard"
+        body_format: json
+        method: PUT
+        user: "{{ elasticsearch_user }}"
+        password: "{{ elasticsearch_password }}"
+        body: "{{ lookup('file','security_role_dashboard.json') }}"
+        status_code:
+          - 201
+          - 200
+
+    - name: Create the dashboard user with the credentials admin password
+      uri:
+        url: "{{elasticsearch_host}}.security-6/doc/user-admin"
+        body_format: json
+        method: PUT
+        user: "{{ elasticsearch_user }}"
+        password: "{{ elasticsearch_password }}"
+        body: "{{ lookup('file','security_user_dashboard.json') }}"
+        status_code:
+          - 201
+          - 200
+
+    # Configure nginx
+    - name: Change the nginx configuration
+      template: src=templates/nginx_backend.conf dest=/etc/nginx/sites-available/default
+
+    - name: Restart nginx and make sure it autostarts
+      service: name=nginx state=restarted enabled=yes
+
+    - name: Check HTTP
+      uri:
+        url: "http://{{ inventory_hostname }}"
+        follow_redirects: none
+        status_code: 301
+      register: response
+      retries: 3
+      delay: 2
+      delegate_to: 127.0.0.1
+      become: false
+
+    - name: Fail if HTTP is not being redirected to HTTPS
+      fail:
+      when: response.status != 301
+
+    - name: Check HTTPS
+      openssl_certificate:
+        path: /etc/letsencrypt/live/{{ inventory_hostname }}/fullchain.pem
+        provider: assertonly
+        issuer:
+          O: Let's Encrypt
+        has_expired: false
+        subject_alt_name:
+          - "DNS:{{ inventory_hostname }}"

@@ -1,0 +1,164 @@
+- hosts: all
+  remote_user: ubuntu
+  become: true
+  gather_facts: yes
+
+
+  vars_files:
+    - variables.yml
+
+
+  pre_tasks:
+    - name: Install Python2 to make Ansible work
+      raw: sudo apt-get update && sudo apt-get -y install python-minimal
+
+
+  post_tasks:
+    - include_tasks: ansible_event.yml
+      vars:
+        application: configure_all
+
+
+  tasks:
+
+    # System
+    - name: Update and upgrade apt packages
+      apt: upgrade=dist
+
+    - name: Install NTP to avoid time drift, PIP to manage Python dependencies, and utilities
+      apt: name={{ item }}
+      with_items:
+        - ntp
+        - ntpdate
+        - python3-pip
+        - git
+        - unzip
+
+    - name: Install the pyOpenSSL library, so Ansible can use it to check TLS certificates
+      pip: name=pyopenssl
+
+    # Global Elasticsearch configuration
+    - name: Register a global index template
+      uri:
+        url: "{{elasticsearch_host}}_template/template_global"
+        body_format: json
+        method: PUT
+        user: "{{ elasticsearch_user }}"
+        password: "{{ elasticsearch_password }}"
+        body:
+          template: "*"
+          settings:
+            number_of_shards: 1
+            number_of_replicas: 0
+            refresh_interval: 2s
+        status_code:
+          - 201
+          - 200
+      run_once: true
+
+    # Filebeat
+    - name: Install Filebeat
+      apt: deb={{ elastic_download }}/downloads/beats/filebeat/filebeat-{{ elastic_version }}-amd64.deb
+
+    - name: Change the Filebeat configuration
+      template: src=templates/filebeat.yml dest=/etc/filebeat/filebeat.yml
+
+    - name: Restart Filebeat and make sure it autostarts
+      service: name=filebeat state=restarted enabled=yes
+
+    # Metricbeat
+    - name: Install Metricbeat
+      apt: deb={{ elastic_download }}/downloads/beats/metricbeat/metricbeat-{{ elastic_version }}-amd64.deb
+
+    - name: Change the Metricbeat configuration
+      template: src=templates/metricbeat.yml dest=/etc/metricbeat/metricbeat.yml
+
+    - name: Restart Metricbeat and make sure it autostarts
+      service: name=metricbeat state=restarted enabled=yes
+
+    # Packetbeat
+    - name: Install Packetbeat
+      apt: deb={{ elastic_download }}/downloads/beats/packetbeat/packetbeat-{{ elastic_version }}-amd64.deb
+
+    - name: Change the Packetbeat configuration
+      template: src=templates/packetbeat.yml dest=/etc/packetbeat/packetbeat.yml
+
+    - name: Restart Packetbeat and make sure it autostarts
+      service: name=packetbeat state=restarted enabled=yes
+
+    # Auditbeat
+    - name: Install Auditbeat
+      apt: deb={{ elastic_download }}/downloads/beats/auditbeat/auditbeat-{{ elastic_version }}-amd64.deb
+
+    - name: Change the Auditbeat configuration
+      template: src=templates/auditbeat.yml dest=/etc/auditbeat/auditbeat.yml
+
+    - name: Restart Auditbeat and make sure it autostarts
+      service: name=auditbeat state=restarted enabled=yes
+
+    # osquery
+    - name: Add osquery's repository key
+      apt_key:
+        keyserver: "keyserver.ubuntu.com"
+        id: "1484120AC4E9F8A1A577AEEE97A80C63C9D8B80B"
+        state: present
+
+    - name: Add osquery's server repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://osquery-packages.s3.amazonaws.com/{{ ansible_distribution_release }} {{ ansible_distribution_release }} main"
+        state: present
+
+    - name: Install osquery
+      apt: name=osquery update_cache=true
+
+    - name: Restart osquery and make sure it autostarts
+      service: name=osqueryd state=restarted enabled=yes
+
+    # nginx
+    - name: Install nginx
+      apt: name=nginx
+
+    - name: Stop nginx so that Certbot can bind to port 80
+      service: name=nginx state=stopped
+
+    - name: Add the certbot repository
+      apt_repository: repo="ppa:certbot/certbot"
+
+    - name: Install certbot and update the cache for the new PPA
+      apt: name=python-certbot-nginx update_cache=yes
+
+    - name: Add the hostname to the certificates to create
+      set_fact:
+        certificates:
+          - "{{ inventory_hostname }}"
+
+    - name: Add more domains to the frontend certificate
+      set_fact:
+        certificates:
+          - "{{ inventory_hostname }}"
+          - "{{ domain }}"
+          - "www.{{ domain }}"
+      when: inventory_hostname == "frontend." + domain
+
+    - name: Add more domains to the backend certificate
+      set_fact:
+        certificates:
+          - "{{ inventory_hostname }}"
+          - "kibana.{{ domain }}"
+      when: inventory_hostname == "backend." + domain
+
+    - name: Create the certificate
+      command: >
+        certbot certonly --non-interactive --standalone
+        --agree-tos --email admin@{{ domain }}
+        -d {{ certificates | join(',') }}
+        creates=/etc/letsencrypt/live/{{ inventory_hostname }}/fullchain.pem
+
+    - name: Add crontab to renew certificates every second month on Sunday night
+      cron: minute="30" hour="3" weekday="0" month="*/2" job="service nginx stop && certbot renew >> /var/log//var/log/letsencrypt/renew.log && service nginx start"
+
+    - name: Generate strong dhparams, but only if the file doesn't exist
+      command: openssl dhparam -out /etc/ssl/certs/dhparam.pem 4096 creates=/etc/ssl/certs/dhparam.pem
+
+    - name: Set a global TLS configuration
+      template: src=templates/tls.conf dest=/etc/nginx/tls.conf

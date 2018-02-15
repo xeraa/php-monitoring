@@ -1,0 +1,44 @@
+- hosts: frontend
+  remote_user: ubuntu
+  become: true
+  gather_facts: yes
+
+
+  vars_files:
+    - variables.yml
+
+
+  post_tasks:
+    - include_tasks: ansible_event.yml
+      vars:
+        application: deploy_frontend
+
+
+  tasks:
+
+    # SilverStripe
+    - name: Check if SilverStripe is installed
+      stat: path=/var/www/html/silverstripe/
+      register: silverstripe_dir
+
+    #- name: Clean out the SilverStripe directory to start fresh
+    #  file:
+    #    state: absent
+    #    path: /var/www/html/silverstripe/
+
+    - name: Clone SilverStripe and install it with all dependencies
+      composer:
+        command: create-project
+        arguments: silverstripe/installer ./silverstripe ^4
+        working_dir: /var/www/html
+        prefer_dist: yes
+      when: not silverstripe_dir.stat.exists
+
+    - name: Fix the permissions for SilverStripe
+      file:
+        path: /var/www/html/silverstripe/
+        owner: www-data
+        group: www-data
+        mode: 0755
+        state: directory
+        recurse: yes

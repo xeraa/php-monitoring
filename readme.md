@@ -8,23 +8,31 @@ Monitor your PHP application with logs, metrics, pings, and traces.
 
 1. Quick overview of what is running in Kibana's monitoring view.
 1. **Metricbeat System**:
+
   * Show the *[Metricbeat System] Overview* dashboard in Kibana.
   * Then switch to *[Metricbeat System] Host overview* and see the spike.
   * Build a visualization with Time Series Visual Builder to find out what is going on: `system.memory.used.bytes` per `beat.name` and `system.process.memory.rss.bytes` per `system.process.name` sorted by the `Sum of system.process.memory.rss.bytes`.
+
 1. **Packetbeat**: Let attendees hit the CMS with a few requests.
+
   * Show the *[Packetbeat] Overview* and *[Packetbeat] Flows*.
   * Explain why *[Packetbeat] HTTP* is empty.
   * Hit a URL with a bad certificate (like frontend) and filter down in the Packetbeat Discover view to `type: "tls"` and `status: "Error"`.
+
 1. **Filebeat modules**:
+
   * Show the *[Filebeat Nginx] Overview* and *[Filebeat Nginx] Access and error logs* dashboards.
   * Show the *[Filebeat MySQL] Overview* dashboard.
   * Show the *[Filebeat System] SSH login attempts*, *[Filebeat System] Sudo commands*, and *[Filebeat System] Syslog dashboard* dashboards.
+
 1. Run `./ab.sh` on the backend instance to get a more interesting view of the *[Filebeat Nginx] Overview* and *[Packetbeat] MySQL performance* dashboards.
 1. **Metricbeat modules**:
+
   * Show the *[Metricbeat Nginx] Overview* dashboard based on [https://xeraa.wtf/server-status](https://xeraa.wtf/server-status).
   * Show the *[Metricbeat MySQL] Overview* dashboard.
   * Build a Time Series Visual Builder visualization for [https://xeraa.wtf/status](https://xeraa.wtf/status): Sum of `php_fpm.pool.connections.accepted` (optionally the derivative of this value), sum of `php_fpm.pool.connections.queued`, and sum of `php_fpm_pool.process.active`on a different axis and as a bar.
   * Add annotations to the previous visualizations — they don't correlate in this example, but it is still handy to see.
+
 1. **Filebeat**: Collecting both */var/www/html/silverstripe/silverstripe.log* and */var/www/html/silverstripe/silverstripe.json*. Hit [https://xeraa.wtf/error/](https://xeraa.wtf/error/), [https://xeraa.wtf/error/server/](https://xeraa.wtf/error/server/), and [https://xeraa.wtf/error/client/](https://xeraa.wtf/error/client/) for different errors and find them in the logs.
 1. **Heartbeat**: Run Heartbeat and show the *Heartbeat HTTP monitoring* dashboard in Kibana, then stop either nginx or php-fpm (different response code).
 1. **Auditbeat**: Show the dashboards for *[Auditbeat Auditd] Overview* and *[Auditbeat File Integrity] Overview*.

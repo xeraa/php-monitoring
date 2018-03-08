@@ -3,14 +3,24 @@ filebeat.prospectors:
 # Collect stdin
 - type: stdin
 
+{% if inventory_hostname_short == 'frontend' %}
+# Collect a standard log
+- type: log
+  paths:
+    - /var/www/html/silverstripe/silverstripe.log
+  fields_under_root: true
+  fields:
+    application: silverstripe
+
 # Collect a JSON file
 - type: log
   paths:
-    - /var/log/apps/*.json
+    - /var/www/html/silverstripe/silverstripe.json
   fields_under_root: true
   fields:
-    application: php
+    application: silverstripe
   json.message_key: log
+{% endif %}
 
 
 filebeat.modules:
@@ -18,6 +28,9 @@ filebeat.modules:
 - module: nginx
 - module: osquery
 - module: system
+{% if inventory_hostname_short == 'backend' %}
+- module: mysql
+{% endif %}
 
 
 name: "{{ inventory_hostname }}"
@@ -26,6 +39,9 @@ tags: ["{{ env }}", "lightsail"]
 
 processors:
 - add_cloud_metadata: ~
+
+
+xpack.monitoring.enabled: true
 
 
 output.elasticsearch:

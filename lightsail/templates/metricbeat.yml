@@ -22,18 +22,32 @@ metricbeat.modules:
     by_cpu: 20
     by_memory: 20
 
+{% if inventory_hostname_short == 'backend' %}
 - module: nginx
   metricsets: ["stubstatus"]
   enabled: true
   period: 10s
-  hosts: ["https://{{ inventory_hostname }}"]
+  hosts: ["https://kibana.{{ domain }}"]
+
+- module: mysql
+  metricsets: ["status"]
+  hosts: ["tcp(127.0.0.1:3306)/"]
+  username: {{ silverstripe_mysql_user }}
+  password: {{ silverstripe_mysql_password }}
+{% endif %}
 
 {% if inventory_hostname_short == 'frontend' %}
+- module: nginx
+  metricsets: ["stubstatus"]
+  enabled: true
+  period: 10s
+  hosts: ["https://{{ domain }}"]
+
 - module: php_fpm
   metricsets: ["pool"]
   period: 10s
   status_path: "/status"
-  hosts: ["https://{{ inventory_hostname }}"]
+  hosts: ["https://{{ domain }}"]
 {% endif %}
 
 
@@ -43,6 +57,9 @@ tags: ["{{ env }}", "lightsail"]
 
 processors:
 - add_cloud_metadata: ~
+
+
+xpack.monitoring.enabled: true
 
 
 output.elasticsearch:

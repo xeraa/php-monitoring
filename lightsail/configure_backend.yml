@@ -75,6 +75,24 @@
     - name: Restart Heartbeat and make sure it autostarts
       service: name=heartbeat-elastic state=restarted enabled=yes
 
+    # ApacheBench
+    - name: Install ApacheBench
+      apt: name={{ item }}
+      with_items:
+        - apache2-utils
+        - parallel
+
+    - name: Add a list of URLs to benchmark
+      template: src=templates/urls.txt dest=/home/ubuntu/urls.txt owner=ubuntu group=ubuntu mode=0644
+
+    - name: Add a quick ApacheBench script
+      copy:
+        src: files/ab.sh
+        dest: /home/ubuntu/ab.sh
+        owner: ubuntu
+        group: ubuntu
+        mode: 0755
+
     # Dashboard-only user
     - name: Create a role for a user to only view the dashboards
       uri:
@@ -109,7 +127,7 @@
 
     - name: Check HTTP
       uri:
-        url: "http://{{ inventory_hostname }}"
+        url: "http://kibana.{{ domain }}"
         follow_redirects: none
         status_code: 301
       register: response
@@ -124,10 +142,10 @@
 
     - name: Check HTTPS
       openssl_certificate:
-        path: /etc/letsencrypt/live/{{ inventory_hostname }}/fullchain.pem
+        path: /etc/letsencrypt/live/{{ domain }}/fullchain.pem
         provider: assertonly
         issuer:
           O: Let's Encrypt
         has_expired: false
         subject_alt_name:
-          - "DNS:{{ inventory_hostname }}"
+          - "DNS:kibana.{{ domain }}"

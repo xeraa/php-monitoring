@@ -39,6 +39,12 @@
         - { key: 'display_errors', value: 'On' }
         - { key: 'date.timezone', value: 'Europe/Vienna' }
 
+    - name: Enable the PHP status page
+      lineinfile:
+        dest: /etc/php/7.0/fpm/pool.d/www.conf
+        regexp: '^;pm.status_path'
+        line: pm.status_path = /status
+
     - name: Restart PHP and make sure it autostarts
       service: name=php7.0-fpm state=restarted enabled=yes
 
@@ -68,7 +74,7 @@
 
     - name: Check HTTP
       uri:
-        url: "http://{{ inventory_hostname }}"
+        url: "http://{{ domain }}"
         follow_redirects: none
         status_code: 301
       register: response
@@ -83,17 +89,17 @@
 
     - name: Check HTTPS
       openssl_certificate:
-        path: /etc/letsencrypt/live/{{ inventory_hostname }}/fullchain.pem
+        path: /etc/letsencrypt/live/{{ domain }}/fullchain.pem
         provider: assertonly
         issuer:
           O: Let's Encrypt
         has_expired: false
         subject_alt_name:
-          - "DNS:{{ inventory_hostname }}"
+          - "DNS:www.{{ domain }}"
 
     - name: Check HTTPS apex
       openssl_certificate:
-        path: /etc/letsencrypt/live/{{ inventory_hostname }}/fullchain.pem
+        path: /etc/letsencrypt/live/{{ domain }}/fullchain.pem
         provider: assertonly
         issuer:
           O: Let's Encrypt

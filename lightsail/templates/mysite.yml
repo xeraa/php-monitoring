@@ -1,0 +1,5 @@
+---
+Name: {{ domain }}
+---
+SilverStripe\Core\Manifest\ModuleManifest:
+  project: {{ domain }}

@@ -15,7 +15,7 @@ packetbeat.protocols:
   ports: [53]
 
 - type: http
-  ports: [80, 443, 8080]
+  ports: [80, 8080]
   real_ip_header: "X-Forwarded-For"
 
 - type: tls
@@ -33,6 +33,9 @@ tags: ["{{ env }}", "lightsail"]
 
 processors:
 - add_cloud_metadata: ~
+
+
+xpack.monitoring.enabled: true
 
 
 output.elasticsearch:

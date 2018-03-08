@@ -111,6 +111,12 @@
     - name: Install osquery
       apt: name=osquery update_cache=true
 
+    - name: Activate the default configuration
+      copy:
+        src: /usr/share/osquery/osquery.example.conf
+        dest: /usr/share/osquery/osquery.conf
+        remote_src: yes
+
     - name: Restart osquery and make sure it autostarts
       service: name=osqueryd state=restarted enabled=yes
 
@@ -132,18 +138,16 @@
         certificates:
           - "{{ inventory_hostname }}"
 
-    - name: Add more domains to the frontend certificate
+    - name: Set the domains to the frontend certificate (this actually removes the inventory_hostname)
       set_fact:
         certificates:
-          - "{{ inventory_hostname }}"
           - "{{ domain }}"
           - "www.{{ domain }}"
       when: inventory_hostname == "frontend." + domain
 
-    - name: Add more domains to the backend certificate
+    - name: Set the domain for the backend certificate (this actually removes the inventory_hostname)
       set_fact:
         certificates:
-          - "{{ inventory_hostname }}"
           - "kibana.{{ domain }}"
       when: inventory_hostname == "backend." + domain
 
@@ -152,7 +156,7 @@
         certbot certonly --non-interactive --standalone
         --agree-tos --email admin@{{ domain }}
         -d {{ certificates | join(',') }}
-        creates=/etc/letsencrypt/live/{{ inventory_hostname }}/fullchain.pem
+        creates=/etc/letsencrypt/live/{{ domain }}/fullchain.pem
 
     - name: Add crontab to renew certificates every second month on Sunday night
       cron: minute="30" hour="3" weekday="0" month="*/2" job="service nginx stop && certbot renew >> /var/log//var/log/letsencrypt/renew.log && service nginx start"
@@ -162,3 +166,6 @@
 
     - name: Set a global TLS configuration
       template: src=templates/tls.conf dest=/etc/nginx/tls.conf
+
+    - name: Restart nginx in case we are running this playbook again
+      service: name=nginx state=started

@@ -23,20 +23,12 @@ Monitor your PHP application with logs, metrics, pings, and traces.
 1. **Metricbeat modules**:
     1. Show the *[Metricbeat Nginx] Overview* dashboard based on [https://xeraa.wtf/server-status](https://xeraa.wtf/server-status).
     1. Show the *[Metricbeat MySQL] Overview* dashboard.
-    1. Build a Time Series Visual Builder visualization for [https://xeraa.wtf/status](https://xeraa.wtf/status): Sum of `php_fpm.pool.connections.accepted` (optionally the derivative of this value), sum of `php_fpm.pool.connections.queued`, and sum of `php_fpm_pool.process.active`on a different axis and as a bar.
+    1. Build a Time Series Visual Builder visualization for [https://xeraa.wtf/status](https://xeraa.wtf/status): Sum of `php_fpm.pool.connections.accepted` (optionally the derivative of this value), sum of `php_fpm.pool.connections.queued`, and sum of `php_fpm_pool.process.active` on a different axis and as a bar.
     1. Add annotations to the previous visualizations — they don't correlate in this example, but it is still handy to see.
 1. **Filebeat**: Collecting both */var/www/html/silverstripe/silverstripe.log* and */var/www/html/silverstripe/silverstripe.json*. Hit [https://xeraa.wtf/error/](https://xeraa.wtf/error/), [https://xeraa.wtf/error/server/](https://xeraa.wtf/error/server/), and [https://xeraa.wtf/error/client/](https://xeraa.wtf/error/client/) for different errors and find them in the logs.
 1. **Heartbeat**: Run Heartbeat and show the *Heartbeat HTTP monitoring* dashboard in Kibana, then stop either nginx or php-fpm (different response code).
 1. **Auditbeat**: Show the dashboards for *[Auditbeat Auditd] Overview* and *[Auditbeat File Integrity] Overview*.
 1. **Kibana Dashboard Mode**: Point attendees to the Kibana instance to let them play around on their own.
-
-
-1. **Filebeat**: Let attendees hit */good* with a parameter and point out the MDC logging under `json.name` and the context view for one log message. Let attendees hit */bad* and */null* to show the stacktrace both in the JSON log file and in Kibana by filtering down on `application:java` and `json.severity: ERROR`. Also point out the `meta.*` information and `json.stack_hash`, which you could also visualize in a bar chart.
-
-
-
-
-
 
 
 
@@ -47,7 +39,7 @@ Monitor your PHP application with logs, metrics, pings, and traces.
 1. Change into the *lightsail/* directory.
 1. Change the settings to a domain you have registered under Route53 in *inventory*, *variables.tf*, and *variables.yml*. Set the Hosted Zone for that domain and export the Zone ID under the environment variable `TF_VAR_zone_id`. If you haven't created the Hosted Zone yet, you should set it up in the AWS Console first and then set the environment variable.
 1. If you haven't installed the AWS plugin for Terraform, get it with `terraform init` first. Then create the keypair, DNS settings, and instances with `terraform apply`.
-1. Open HTTPS on the network configuration on all instances and MySQL on the backend one (waiting for this [Terraform issue](https://github.com/terraform-providers/terraform-provider-aws/issues/700)).
+1. Open HTTPS on the network configuration on all instances as well as MySQL (3306) APM server (8200) on the backend one (waiting for this [Terraform issue](https://github.com/terraform-providers/terraform-provider-aws/issues/700) to automate that step).
 1. Apply the base configuration to all instances with `ansible-playbook --inventory-file=inventory configure_all.yml`.
 1. Apply the instance specific configuration with `ansible-playbook --inventory-file=inventory configure_frontend.yml` and `ansible-playbook --inventory-file=inventory configure_backend.yml`.
 1. Deploy the JAR with `ansible-playbook --inventory-file=inventory deploy_bad.yml` (Ansible is also building it) and `ansible-playbook --inventory-file=inventory deploy_frontend.yml`.
@@ -60,3 +52,5 @@ When you are done, remove the instances, DNS settings, and key with `terraform d
 
 * Switch to: metricbeat keystore create && metricbeat keystore add output.elasticsearch.password
 * Fix: osquery
+* Change: Alerting example
+* APM

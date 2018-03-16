@@ -34,4 +34,4 @@
         name: "Run /opt/bad.jar every 10 minutes"
         minute: "*/6"
         hour: "*"
-        job: "java -Xmx500m -jar /opt/bad.jar"
+        job: "java -Xmx400m -jar /opt/bad.jar"

@@ -21,7 +21,7 @@
       stat: path="{{ silverstripe_directory }}"
       register: silverstripe_dir
 
-    - name: Clone SilverStripe and install it with all dependencies
+    - name: Create SilverStripe and install it with all dependencies
       composer:
         command: create-project
         arguments: silverstripe/installer ./silverstripe ^4

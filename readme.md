@@ -1,6 +1,6 @@
 # PHP Monitoring
 
-Monitor your PHP application with logs, metrics, pings, and traces.
+Monitor your PHP application with logs, metrics, pings, and traces. Slides: [https://speakerdeck.com/xeraa/monitor-your-php-application-with-the-elastic-stack](https://speakerdeck.com/xeraa/monitor-your-php-application-with-the-elastic-stack)
 
 
 
@@ -53,4 +53,4 @@ When you are done, remove the instances, DNS settings, and key with `terraform d
 * Switch to: metricbeat keystore create && metricbeat keystore add output.elasticsearch.password
 * Fix: osquery
 * Change: Alerting example
-* APM
+* APM: https://github.com/philkra/elastic-apm-php-agent

@@ -99,8 +99,8 @@
     # osquery
     - name: Add osquery's repository key
       apt_key:
-        keyserver: "keyserver.ubuntu.com"
-        id: "1484120AC4E9F8A1A577AEEE97A80C63C9D8B80B"
+        keyserver: keyserver.ubuntu.com
+        id: 1484120AC4E9F8A1A577AEEE97A80C63C9D8B80B
         state: present
 
     - name: Add osquery's server repository

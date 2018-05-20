@@ -39,7 +39,7 @@ Monitor your PHP application with logs, metrics, pings, and traces. Slides: [htt
 1. Change into the *lightsail/* directory.
 1. Change the settings to a domain you have registered under Route53 in *inventory*, *variables.tf*, and *variables.yml*. Set the Hosted Zone for that domain and export the Zone ID under the environment variable `TF_VAR_zone_id`. If you haven't created the Hosted Zone yet, you should set it up in the AWS Console first and then set the environment variable.
 1. If you haven't installed the AWS plugin for Terraform, get it with `terraform init` first. Then create the keypair, DNS settings, and instances with `terraform apply`.
-1. Open HTTPS on the network configuration on all instances as well as MySQL (3306) APM server (8200) on the backend one (waiting for this [Terraform issue](https://github.com/terraform-providers/terraform-provider-aws/issues/700) to automate that step).
+1. Open **HTTPS (443)** on the network configuration on all instances as well as **MySQL (3306)** and **APM server (8200)** on the backend one (waiting for this [Terraform issue](https://github.com/terraform-providers/terraform-provider-aws/issues/700) to automate that step).
 1. Apply the base configuration to all instances with `ansible-playbook configure_all.yml`.
 1. Apply the instance specific configuration with `ansible-playbook configure_frontend.yml` and `ansible-playbook configure_backend.yml`.
 1. Deploy the JAR with `ansible-playbook deploy_bad.yml` (Ansible is also building it) and `ansible-playbook deploy_frontend.yml`.
@@ -52,4 +52,4 @@ When you are done, remove the instances, DNS settings, and key with `terraform d
 
 * Switch to: metricbeat keystore create && metricbeat keystore add output.elasticsearch.password
 * Change: Alerting example
-* APM: https://github.com/frankkoornstra/elastic-apm-agent/releases
+* APM: https://github.com/frankkoornstra/elastic-apm-agent/releases (needs PHP 7.2)

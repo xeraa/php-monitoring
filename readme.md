@@ -51,6 +51,5 @@ When you are done, remove the instances, DNS settings, and key with `terraform d
 ## Todo
 
 * Switch to: metricbeat keystore create && metricbeat keystore add output.elasticsearch.password
-* Fix: osquery
 * Change: Alerting example
-* APM: https://github.com/philkra/elastic-apm-php-agent
+* APM: https://github.com/frankkoornstra/elastic-apm-agent/releases

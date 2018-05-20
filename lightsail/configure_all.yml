@@ -156,10 +156,12 @@
           - "www.{{ domain }}"
       when: inventory_hostname == "frontend." + domain
 
-    - name: Set the domain for the backend certificate (this actually removes the inventory_hostname)
+    - name: Add more domains to the backend certificate
       set_fact:
         certificates:
+          - "{{ inventory_hostname }}"
           - "kibana.{{ domain }}"
+          - "dashboard.{{ domain }}"
       when: inventory_hostname == "backend." + domain
 
     - name: Create the certificate

@@ -16,6 +16,16 @@
 
   tasks:
 
+    # Check that we can reach services on the backend instance
+    - name: Check all port numbers are accessible from current host
+      wait_for:
+        host: "backend.{{ domain }}"
+        port: "{{ item }}"
+        state: started
+        delay: 0
+        timeout: 3
+      with_items:
+        - 3306
     # SilverStripe
     - name: Check if SilverStripe is installed
       stat: path="{{ silverstripe_directory }}"

@@ -28,6 +28,7 @@
         - php-mbstring
         - php-mysql
         - php-tidy
+        - php-xdebug
         - php-xml
 
     - name: Configure PHP

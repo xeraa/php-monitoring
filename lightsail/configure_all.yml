@@ -33,6 +33,9 @@
         - python3-pip
         - git
         - unzip
+        - build-essential
+        - libssl-dev
+        - libffi-dev
 
     - name: Install the pyOpenSSL library, so Ansible can use it to check TLS certificates
       pip: name=pyopenssl

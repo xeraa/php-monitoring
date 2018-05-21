@@ -26,6 +26,8 @@
         timeout: 3
       with_items:
         - 3306
+        - 8200
+
     # SilverStripe
     - name: Check if SilverStripe is installed
       stat: path="{{ silverstripe_directory }}"
@@ -38,6 +40,19 @@
         working_dir: /var/www/html
         prefer_dist: yes
       when: not silverstripe_dir.stat.exists
+
+    #- name: Add a community elastic-apm-php-agent to the composer file
+    #  lineinfile:
+    #    path: "{{ silverstripe_directory }}composer.json"
+    #    regexp: 'techdeco/elastic-apm-agent'
+    #    insertafter: silverstripe/recipe-cms
+    #    line: '        "techdeco/elastic-apm-agent": "0.4.0",'
+    #    state: present
+
+    #- name: Install the agent with composer
+    #  composer:
+    #    command: update
+    #    working_dir: "{{ silverstripe_directory }}"
 
     - name: Fix the permissions for SilverStripe
       file:

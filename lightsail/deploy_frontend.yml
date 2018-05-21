@@ -36,7 +36,7 @@
     - name: Create SilverStripe and install it with all dependencies
       composer:
         command: create-project
-        arguments: silverstripe/installer ./silverstripe ^4
+        arguments: silverstripe/installer ./silverstripe 4.1.0
         working_dir: /var/www/html
         prefer_dist: yes
       when: not silverstripe_dir.stat.exists

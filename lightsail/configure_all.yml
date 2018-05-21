@@ -144,14 +144,10 @@
     - name: Install certbot and update the cache for the new PPA
       apt: name=python-certbot-nginx update_cache=yes
 
-    - name: Add the hostname to the certificates to create
+    - name: Set the domains to the frontend certificate
       set_fact:
         certificates:
           - "{{ inventory_hostname }}"
-
-    - name: Set the domains to the frontend certificate (this actually removes the inventory_hostname)
-      set_fact:
-        certificates:
           - "{{ domain }}"
           - "www.{{ domain }}"
       when: inventory_hostname == "frontend." + domain

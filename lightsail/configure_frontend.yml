@@ -89,7 +89,7 @@
 
     - name: Check HTTPS
       openssl_certificate:
-        path: /etc/letsencrypt/live/{{ domain }}/fullchain.pem
+        path: /etc/letsencrypt/live/{{ inventory_hostname }}/fullchain.pem
         provider: assertonly
         issuer:
           O: Let's Encrypt
@@ -99,7 +99,7 @@
 
     - name: Check HTTPS apex
       openssl_certificate:
-        path: /etc/letsencrypt/live/{{ domain }}/fullchain.pem
+        path: /etc/letsencrypt/live/{{ inventory_hostname }}/fullchain.pem
         provider: assertonly
         issuer:
           O: Let's Encrypt

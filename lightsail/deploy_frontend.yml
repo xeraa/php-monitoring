@@ -64,7 +64,12 @@
         recurse: yes
 
     - name: Set up SilverStripe
-      template: src=templates/env dest="{{ silverstripe_directory }}.env"
+      template:
+        src: templates/env
+        dest: "{{ silverstripe_directory }}.env"
+        owner: www-data
+        group: www-data
+        mode: 0755
 
     - name: Deploy some custom code
       copy:
@@ -75,4 +80,9 @@
         mode: 0755
 
     - name: Configure my site through a template
-      template: src=templates/mysite.yml dest="{{ silverstripe_directory }}mysite/_config/mysite.yml"
+      template:
+        src: templates/mysite.yml
+        dest: "{{ silverstripe_directory }}mysite/_config/mysite.yml"
+        owner: www-data
+        group: www-data
+        mode: 0755

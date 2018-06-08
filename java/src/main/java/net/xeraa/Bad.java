@@ -17,7 +17,7 @@ public class Bad {
             System.out.println(formatBytes(Runtime.getRuntime().totalMemory()) + " of " +
                     formatBytes(Runtime.getRuntime().maxMemory()) + " allocated; " +
                     formatBytes(Runtime.getRuntime().freeMemory()) + " free");
-            sleep(75);
+            sleep(5000);
         }
     }
 

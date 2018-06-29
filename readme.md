@@ -11,6 +11,7 @@ Monitor your PHP application with logs, metrics, pings, and traces. Slides: [htt
     1. Show the *[Metricbeat System] Overview* dashboard in Kibana.
     1. Then switch to *[Metricbeat System] Host overview* and see the spike.
     1. Build a visualization with Time Series Visual Builder to find out what is going on: `system.memory.used.bytes` per `beat.name` and `system.process.memory.rss.bytes` per `system.process.name` sorted by the `Sum of system.process.memory.rss.bytes`.
+    1. Enable the `disabled: yes` in the *deploy_bad.yml* playbook to avoid any hiccups during the demo. Show the annotation of the event in the visualization above (potentially let come back to it at the end of the talk).
 1. **Packetbeat**: Let attendees hit the CMS with a few requests.
     1. Show the *[Packetbeat] Overview* and *[Packetbeat] Flows*.
     1. Explain why *[Packetbeat] HTTP* is empty.

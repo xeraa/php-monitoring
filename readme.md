@@ -20,6 +20,7 @@ Monitor your PHP application with logs, metrics, pings, and traces. Slides: [htt
     1. Show the *[Filebeat Nginx] Overview* and *[Filebeat Nginx] Access and error logs* dashboards.
     1. Show the *[Filebeat MySQL] Overview* dashboard.
     1. Show the *[Filebeat System] SSH login attempts*, *[Filebeat System] Sudo commands*, and *[Filebeat System] Syslog dashboard* dashboards.
+    1. Show the *[Osquery Result] Compliance pack* dashboard.
 1. Run `./ab.sh` on the backend instance to get a more interesting view of the *[Filebeat Nginx] Overview* and *[Packetbeat] MySQL performance* dashboards.
 1. **Metricbeat modules**:
     1. Show the *[Metricbeat Nginx] Overview* dashboard based on [https://xeraa.wtf/server-status](https://xeraa.wtf/server-status).

@@ -1,8 +1,5 @@
 filebeat.prospectors:
 
-# Collect stdin
-- type: stdin
-
 {% if inventory_hostname_short == 'frontend' %}
 # Collect a standard log
 - type: log

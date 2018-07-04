@@ -4,7 +4,7 @@ filebeat.prospectors:
 # Collect a standard log
 - type: log
   paths:
-    - /var/www/html/silverstripe/silverstripe.log
+    - /var/www/html/silverstripe/public/silverstripe.log
   fields_under_root: true
   fields:
     application: silverstripe
@@ -12,7 +12,7 @@ filebeat.prospectors:
 # Collect a JSON file
 - type: log
   paths:
-    - /var/www/html/silverstripe/silverstripe.json
+    - /var/www/html/silverstripe/public/silverstripe.json
   fields_under_root: true
   fields:
     application: silverstripe

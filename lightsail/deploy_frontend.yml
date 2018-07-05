@@ -54,6 +54,11 @@
     #    command: update
     #    working_dir: "{{ silverstripe_directory }}"
 
+    - name: Make sure the logs folder exists
+      file:
+        path: "{{ silverstripe_directory }}/logs"
+        state: directory
+
     - name: Fix the permissions for SilverStripe
       file:
         path: "{{ silverstripe_directory }}"

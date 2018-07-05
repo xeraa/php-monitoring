@@ -7,13 +7,13 @@ SilverStripe\Core\Injector\Injector:
   LogFileHandler:
     class: Monolog\Handler\StreamHandler
     constructor:
-      - "./silverstripe.log"
+      - "../logs/silverstripe.log"
       - "notice"
 
   JsonFileHandler:
     class: Monolog\Handler\StreamHandler
     constructor:
-      - "./silverstripe.json"
+      - "../logs/silverstripe.json"
       - "notice"
     properties:
       Formatter: %$Monolog\Formatter\JsonFormatter

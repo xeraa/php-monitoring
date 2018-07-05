@@ -91,3 +91,6 @@
         owner: www-data
         group: www-data
         mode: 0755
+
+    - name: Call flush on the page to finish the installation and apply any changes
+      uri: url=https://{{ domain }}?flush=all

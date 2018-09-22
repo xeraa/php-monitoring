@@ -15,6 +15,7 @@ class ErrorController extends Controller {
     'index',
     'server',
     'client',
+    'exception',
   ];
 
   public function index(){
@@ -24,12 +25,18 @@ class ErrorController extends Controller {
 
   public function server(){
     user_error("Server error 😱", E_USER_WARNING);
+    return;
   }
 
   public function client(){
     $this->setResponse(new HTTPResponse());
     $this->getResponse()->setStatusCode(400);
-    $this->getResponse()->setBody('Invalid, but no server error 🤯');
+    $this->getResponse()->setBody('Invalid user interaction 🤯');
+    $this->logger->debug('Invalid user interaction 🤯');
     return $this->getResponse();
+  }
+
+  public function exception(){
+    throw new \LogicException('Welcome to exception land 🔥');
   }
 }

@@ -14,6 +14,10 @@ kibana_id: "{{ lookup('env','KIBANA_ID') }}"
 # Setup of the infrastructure
 env: production
 domain: xeraa.wtf
+
+
+# SilverStripe setup
+silverstripe_version: 4.2.1
 silverstripe_user: silverstripe
 silverstripe_password: silverstripe4TW
 silverstripe_database: silverstripe

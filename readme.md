@@ -15,7 +15,7 @@ Monitor your PHP application with logs, metrics, pings, and traces. Slides: [htt
 1. **Packetbeat**: Let attendees hit the CMS with a few requests.
     1. Show the *[Packetbeat] Overview* and *[Packetbeat] Flows*.
     1. Explain why *[Packetbeat] HTTP* is empty.
-    1. Hit a URL with a bad certificate and filter down in the Packetbeat Discover view to `type: "tls"` and `status: "Error"`.
+    1. Show *[Packetbeat] TLS Sessions* and explain why this is one of the more important Packetbeat features.
 1. **Filebeat modules**:
     1. Show the *[Filebeat Nginx] Overview* and *[Filebeat Nginx] Access and error logs* dashboards.
     1. Show the *[Filebeat MySQL] Overview* dashboard.
